@@ -9,14 +9,18 @@ function loadHistory(): LayoutHistory[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) return JSON.parse(raw)
-  } catch {}
+  } catch (e) {
+    console.warn('[HistoryStore] Failed to load history from localStorage:', e)
+  }
   return []
 }
 
 function saveHistory(list: LayoutHistory[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(0, MAX_HISTORY)))
-  } catch {}
+  } catch (e) {
+    console.warn('[HistoryStore] Failed to save history to localStorage:', e)
+  }
 }
 
 export const useHistoryStore = defineStore('history', () => {

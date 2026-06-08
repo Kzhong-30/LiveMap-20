@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { useGridStore } from '@/stores/gridStore'
 import { presetLayouts } from '@/presets'
-import { LayoutGrid, Columns, Rows, Space, RotateCcw, Plus, Minus, Grid3x3 } from 'lucide-vue-next'
+import { LayoutGrid, Columns, Rows, Space, RotateCcw, Plus, Minus, Grid3x3, GripVertical } from 'lucide-vue-next'
 import PresetLayouts from './PresetLayouts.vue'
 
 const gridStore = useGridStore()
+
+function onDragSourceStart(e: DragEvent) {
+  if (e.dataTransfer) {
+    e.dataTransfer.setData('text/plain', 'new-grid-item')
+    e.dataTransfer.effectAllowed = 'copy'
+  }
+}
 
 function adjustColumns(delta: number) {
   const newCols = Math.max(1, gridStore.gridConfig.columns + delta)
@@ -182,12 +189,21 @@ function resetGrid() {
     </div>
 
     <div class="p-4 border-t border-[#2A2D3A]">
+      <div
+        draggable="true"
+        class="w-full h-9 bg-[#00D4AA] text-[#0F1117] rounded-lg text-xs font-semibold hover:bg-[#00E4BA] transition-colors flex items-center justify-center gap-1.5 cursor-grab active:cursor-grabbing"
+        @dragstart="onDragSourceStart"
+      >
+        <GripVertical :size="14" />
+        拖拽添加网格项
+      </div>
+      <p class="text-[10px] text-[#4A4D5A] text-center mt-2">拖拽到右侧画布，或点击下方按钮</p>
       <button
-        class="w-full h-9 bg-[#00D4AA] text-[#0F1117] rounded-lg text-xs font-semibold hover:bg-[#00E4BA] transition-colors flex items-center justify-center gap-1.5"
+        class="w-full h-8 mt-2 bg-[#2A2D3A] text-[#9CA3AF] rounded-lg text-xs font-medium hover:bg-[#3A3D4A] hover:text-[#E0E0E8] transition-colors flex items-center justify-center gap-1.5"
         @click="gridStore.addItem()"
       >
-        <Plus :size="14" />
-        添加网格项
+        <Plus :size="12" />
+        点击添加网格项
       </button>
     </div>
   </div>

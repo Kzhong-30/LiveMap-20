@@ -111,12 +111,67 @@ export const useGridStore = defineStore('grid', () => {
     )
   }
 
+  const _defaultGridConfig = ref<GridConfig | null>(null)
+  const _defaultItems = ref<GridItem[] | null>(null)
+
+  function switchToBreakpoint(index: number) {
+    if (_defaultGridConfig.value === null) {
+      _defaultGridConfig.value = {
+        ...gridConfig.value,
+        columnWidths: [...gridConfig.value.columnWidths],
+        rowHeights: [...gridConfig.value.rowHeights],
+      }
+      _defaultItems.value = items.value.map(i => ({ ...i }))
+    }
+    const bp = breakpoints.value[index]
+    gridConfig.value = {
+      ...bp.gridConfig,
+      columnWidths: [...bp.gridConfig.columnWidths],
+      rowHeights: [...bp.gridConfig.rowHeights],
+    }
+    items.value = bp.items.map(i => ({ ...i }))
+    activeBreakpoint.value = bp.name
+    selectedItemId.value = null
+  }
+
+  function switchToDefault() {
+    if (_defaultGridConfig.value) {
+      gridConfig.value = {
+        ..._defaultGridConfig.value,
+        columnWidths: [..._defaultGridConfig.value.columnWidths],
+        rowHeights: [..._defaultGridConfig.value.rowHeights],
+      }
+      items.value = _defaultItems.value?.map(i => ({ ...i })) ?? []
+      _defaultGridConfig.value = null
+      _defaultItems.value = null
+    }
+    activeBreakpoint.value = null
+    selectedItemId.value = null
+  }
+
+  function saveCurrentToActiveBreakpoint() {
+    if (activeBreakpoint.value === null) return
+    const idx = breakpoints.value.findIndex(bp => bp.name === activeBreakpoint.value)
+    if (idx === -1) return
+    breakpoints.value = breakpoints.value.map((bp, i) =>
+      i === idx
+        ? {
+            ...bp,
+            gridConfig: { ...gridConfig.value, columnWidths: [...gridConfig.value.columnWidths], rowHeights: [...gridConfig.value.rowHeights] },
+            items: items.value.map(i => ({ ...i })),
+          }
+        : bp
+    )
+  }
+
   function clearAll() {
     gridConfig.value = createDefaultGridConfig()
     items.value = []
     selectedItemId.value = null
     breakpoints.value = []
     activeBreakpoint.value = null
+    _defaultGridConfig.value = null
+    _defaultItems.value = null
   }
 
   function getSnapshot() {
@@ -160,6 +215,9 @@ export const useGridStore = defineStore('grid', () => {
     addBreakpoint,
     removeBreakpoint,
     updateBreakpoint,
+    switchToBreakpoint,
+    switchToDefault,
+    saveCurrentToActiveBreakpoint,
     clearAll,
     getSnapshot,
     restoreSnapshot,

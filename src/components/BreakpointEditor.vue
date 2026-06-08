@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useGridStore } from '@/stores/gridStore'
-import { Plus, Trash2, Monitor, Smartphone, Tablet } from 'lucide-vue-next'
+import { Plus, Trash2, Monitor, Smartphone, Tablet, ArrowRight, Save } from 'lucide-vue-next'
 import type { BreakpointConfig } from '@/types'
 
 const gridStore = useGridStore()
@@ -31,6 +31,9 @@ function addBreakpoint() {
 }
 
 function removeBreakpoint(index: number) {
+  if (gridStore.activeBreakpoint === gridStore.breakpoints[index]?.name) {
+    gridStore.switchToDefault()
+  }
   gridStore.removeBreakpoint(index)
 }
 
@@ -43,6 +46,20 @@ function captureCurrent(index: number) {
     },
     items: gridStore.items.map(i => ({ ...i })),
   })
+}
+
+function switchToBreakpoint(index: number) {
+  if (gridStore.activeBreakpoint !== null) {
+    gridStore.saveCurrentToActiveBreakpoint()
+  }
+  gridStore.switchToBreakpoint(index)
+}
+
+function switchToDefault() {
+  if (gridStore.activeBreakpoint !== null) {
+    gridStore.saveCurrentToActiveBreakpoint()
+  }
+  gridStore.switchToDefault()
 }
 </script>
 
@@ -57,6 +74,27 @@ function captureCurrent(index: number) {
         <Plus :size="14" />
       </button>
     </div>
+
+    <div
+      v-if="gridStore.activeBreakpoint"
+      class="p-2 bg-[#00D4AA]/10 border border-[#00D4AA]/30 rounded-lg flex items-center gap-2"
+    >
+      <span class="text-[10px] text-[#00D4AA]">正在编辑: {{ gridStore.activeBreakpoint }}</span>
+      <button
+        class="ml-auto text-[10px] px-2 py-0.5 bg-[#2A2D3A] text-[#9CA3AF] rounded hover:bg-[#3A3D4A] hover:text-[#E0E0E8] transition-colors"
+        @click="switchToDefault"
+      >
+        返回默认
+      </button>
+    </div>
+
+    <button
+      v-if="gridStore.activeBreakpoint === null && gridStore.breakpoints.length > 0"
+      class="w-full h-7 bg-[#2A2D3A] text-[#9CA3AF] rounded text-[10px] hover:bg-[#3A3D4A] hover:text-[#E0E0E8] transition-colors flex items-center justify-center gap-1"
+      @click="switchToDefault"
+    >
+      默认布局（当前）
+    </button>
 
     <div v-if="showAdd" class="p-3 bg-[#0F1117] rounded-lg border border-[#2A2D3A] space-y-2">
       <input
@@ -89,6 +127,7 @@ function captureCurrent(index: number) {
       v-for="(bp, i) in gridStore.breakpoints"
       :key="i"
       class="p-3 bg-[#0F1117] rounded-lg border border-[#2A2D3A] space-y-2"
+      :class="{ 'border-[#00D4AA]/50': gridStore.activeBreakpoint === bp.name }"
     >
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-1.5">
@@ -106,12 +145,23 @@ function captureCurrent(index: number) {
       <div class="text-[10px] text-[#6B7280]">
         {{ bp.gridConfig.columns }}列 × {{ bp.gridConfig.rows }}行 · {{ bp.items.length }}项
       </div>
-      <button
-        class="w-full h-6 bg-[#2A2D3A] text-[#9CA3AF] rounded text-[10px] hover:bg-[#3A3D4A] hover:text-[#E0E0E8] transition-colors"
-        @click="captureCurrent(i)"
-      >
-        捕获当前布局
-      </button>
+      <div class="flex gap-1.5">
+        <button
+          class="flex-1 h-6 bg-[#2A2D3A] text-[#9CA3AF] rounded text-[10px] hover:bg-[#3A3D4A] hover:text-[#E0E0E8] transition-colors flex items-center justify-center gap-1"
+          :class="{ 'bg-[#00D4AA] text-[#0F1117] hover:bg-[#00E4BA]': gridStore.activeBreakpoint === bp.name }"
+          @click="gridStore.activeBreakpoint === bp.name ? switchToDefault() : switchToBreakpoint(i)"
+        >
+          <ArrowRight :size="10" />
+          {{ gridStore.activeBreakpoint === bp.name ? '编辑中' : '切换编辑' }}
+        </button>
+        <button
+          class="h-6 px-2 bg-[#2A2D3A] text-[#9CA3AF] rounded text-[10px] hover:bg-[#3A3D4A] hover:text-[#E0E0E8] transition-colors flex items-center gap-1"
+          @click="captureCurrent(i)"
+        >
+          <Save :size="10" />
+          捕获
+        </button>
+      </div>
     </div>
   </div>
 </template>

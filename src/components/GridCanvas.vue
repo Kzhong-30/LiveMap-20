@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useGridStore } from '@/stores/gridStore'
+import type { CellHighlight } from '@/composables/useDragDrop'
 import GridItemCard from './GridItemCard.vue'
 import { Plus } from 'lucide-vue-next'
 
 const gridStore = useGridStore()
-const canvasRef = ref<HTMLElement | null>(null)
 
 const props = defineProps<{
-  dragOverCell: { col: number; row: number } | null
+  dragOverCell: CellHighlight | null
   isDragging: boolean
 }>()
 
@@ -66,7 +66,6 @@ function handleDelete(id: string) {
       <span class="text-xs text-[#6B7280]">{{ gridStore.items.length }} 个网格项</span>
     </div>
     <div
-      ref="canvasRef"
       class="relative flex-1 min-h-[500px] rounded-xl border border-[#2A2D3A] bg-[#0F1117] overflow-auto p-4 transition-all duration-300"
       :class="{ 'border-[#00D4AA]/50 shadow-[0_0_20px_rgba(0,212,170,0.1)]': isDragging }"
       @dragover="onDragOver"
@@ -108,12 +107,12 @@ function handleDelete(id: string) {
 
       <div
         v-if="isDragging && dragOverCell"
-        class="absolute pointer-events-none rounded-lg bg-[#00D4AA]/20 border-2 border-[#00D4AA] animate-pulse"
+        class="absolute pointer-events-none rounded-lg bg-[#00D4AA]/20 border-2 border-[#00D4AA] animate-pulse z-10"
         :style="{
-          left: '16px',
-          top: '16px',
-          width: '60px',
-          height: '60px',
+          left: dragOverCell.left + 'px',
+          top: dragOverCell.top + 'px',
+          width: dragOverCell.width + 'px',
+          height: dragOverCell.height + 'px',
         }"
       />
 

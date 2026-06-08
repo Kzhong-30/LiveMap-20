@@ -1,16 +1,34 @@
-import { ref, type Ref } from 'vue'
+import { ref, type Ref, computed } from 'vue'
 import { useGridStore } from '@/stores/gridStore'
+
+export interface CellHighlight {
+  left: number
+  top: number
+  width: number
+  height: number
+  col: number
+  row: number
+}
 
 export function useDragDrop(canvasRef: Ref<HTMLElement | null>) {
   const gridStore = useGridStore()
-  const dragOverCell = ref<{ col: number; row: number } | null>(null)
+  const dragOverCell = ref<CellHighlight | null>(null)
   const isDragging = ref(false)
 
-  function getCellFromEvent(e: DragEvent): { col: number; row: number } | null {
+  function getGridContainer(): HTMLElement | null {
     if (!canvasRef.value) return null
-    const rect = canvasRef.value.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
+    return canvasRef.value.querySelector('[style*="display: grid"]') as HTMLElement | null
+  }
+
+  function getCellHighlight(e: DragEvent): CellHighlight | null {
+    const gridEl = getGridContainer()
+    if (!gridEl) return null
+
+    const canvasRect = canvasRef.value!.getBoundingClientRect()
+    const gridRect = gridEl.getBoundingClientRect()
+
+    const x = e.clientX - gridRect.left
+    const y = e.clientY - gridRect.top
 
     const cols = gridStore.gridConfig.columns
     const rows = gridStore.gridConfig.rows
@@ -19,14 +37,26 @@ export function useDragDrop(canvasRef: Ref<HTMLElement | null>) {
 
     const totalGapX = gapX * (cols - 1)
     const totalGapY = gapY * (rows - 1)
-    const cellW = (rect.width - totalGapX) / cols
-    const cellH = (rect.height - totalGapY) / rows
+    const cellW = (gridRect.width - totalGapX) / cols
+    const cellH = (gridRect.height - totalGapY) / rows
 
-    const col = Math.min(Math.floor(x / (cellW + gapX)) + 1, cols)
-    const row = Math.min(Math.floor(y / (cellH + gapY)) + 1, rows)
+    const col = Math.max(1, Math.min(Math.floor(x / (cellW + gapX)) + 1, cols))
+    const row = Math.max(1, Math.min(Math.floor(y / (cellH + gapY)) + 1, rows))
 
-    if (col < 1 || row < 1) return null
-    return { col, row }
+    const cellLeft = (col - 1) * (cellW + gapX)
+    const cellTop = (row - 1) * (cellH + gapY)
+
+    const highlightLeft = gridRect.left - canvasRect.left + cellLeft
+    const highlightTop = gridRect.top - canvasRect.top + cellTop
+
+    return {
+      left: highlightLeft,
+      top: highlightTop,
+      width: cellW,
+      height: cellH,
+      col,
+      row,
+    }
   }
 
   function onCanvasDragOver(e: DragEvent) {
@@ -35,7 +65,7 @@ export function useDragDrop(canvasRef: Ref<HTMLElement | null>) {
       e.dataTransfer.dropEffect = 'copy'
     }
     isDragging.value = true
-    dragOverCell.value = getCellFromEvent(e)
+    dragOverCell.value = getCellHighlight(e)
   }
 
   function onCanvasDragLeave() {
@@ -46,17 +76,24 @@ export function useDragDrop(canvasRef: Ref<HTMLElement | null>) {
   function onCanvasDrop(e: DragEvent) {
     e.preventDefault()
     isDragging.value = false
-    const cell = getCellFromEvent(e)
-    if (cell) {
+    const highlight = getCellHighlight(e)
+    if (highlight) {
       gridStore.addItem({
-        columnStart: cell.col,
-        columnEnd: cell.col + 1,
-        rowStart: cell.row,
-        rowEnd: cell.row + 1,
-        label: `Item ${cell.col},${cell.row}`,
+        columnStart: highlight.col,
+        columnEnd: highlight.col + 1,
+        rowStart: highlight.row,
+        rowEnd: highlight.row + 1,
+        label: `Item ${highlight.col},${highlight.row}`,
       })
     }
     dragOverCell.value = null
+  }
+
+  function onDragSourceStart(e: DragEvent) {
+    if (e.dataTransfer) {
+      e.dataTransfer.setData('text/plain', 'new-grid-item')
+      e.dataTransfer.effectAllowed = 'copy'
+    }
   }
 
   function onItemDragStart(e: DragEvent, itemId: string) {
@@ -70,7 +107,7 @@ export function useDragDrop(canvasRef: Ref<HTMLElement | null>) {
     e.preventDefault()
     e.stopPropagation()
     const sourceId = e.dataTransfer?.getData('text/plain')
-    if (sourceId && sourceId !== targetItemId) {
+    if (sourceId && sourceId !== targetItemId && sourceId !== 'new-grid-item') {
       const sourceItem = gridStore.items.find(i => i.id === sourceId)
       const targetItem = gridStore.items.find(i => i.id === targetItemId)
       if (sourceItem && targetItem) {
@@ -90,6 +127,7 @@ export function useDragDrop(canvasRef: Ref<HTMLElement | null>) {
     onCanvasDragOver,
     onCanvasDragLeave,
     onCanvasDrop,
+    onDragSourceStart,
     onItemDragStart,
     onItemDrop,
   }
