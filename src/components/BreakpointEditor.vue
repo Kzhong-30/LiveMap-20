@@ -7,7 +7,7 @@ import type { BreakpointConfig } from '@/types'
 const gridStore = useGridStore()
 
 const newName = ref('')
-const newMinWidth = ref(768)
+const newMaxWidth = ref(768)
 const showAdd = ref(false)
 
 const deviceIcons: Record<string, any> = {
@@ -24,9 +24,9 @@ function guessDevice(width: number): string {
 
 function addBreakpoint() {
   if (!newName.value.trim()) return
-  gridStore.addBreakpoint(newName.value.trim(), newMinWidth.value)
+  gridStore.addBreakpoint(newName.value.trim(), newMaxWidth.value)
   newName.value = ''
-  newMinWidth.value = 768
+  newMaxWidth.value = 768
   showAdd.value = false
 }
 
@@ -105,7 +105,7 @@ function switchToDefault() {
       <div class="flex items-center gap-2">
         <span class="text-[10px] text-[#6B7280]">max-width:</span>
         <input
-          v-model.number="newMinWidth"
+          v-model.number="newMaxWidth"
           type="number"
           class="flex-1 h-7 bg-[#1A1D27] border border-[#2A2D3A] rounded px-2 text-xs font-mono text-[#E0E0E8] focus:border-[#00D4AA] focus:outline-none transition-colors"
         />
@@ -131,9 +131,9 @@ function switchToDefault() {
     >
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-1.5">
-          <component :is="deviceIcons[guessDevice(bp.minWidth)] || Monitor" :size="12" class="text-[#00D4AA]" />
+          <component :is="deviceIcons[guessDevice(bp.maxWidth)] || Monitor" :size="12" class="text-[#00D4AA]" />
           <span class="text-xs text-[#E0E0E8] font-medium">{{ bp.name }}</span>
-          <span class="text-[10px] text-[#6B7280]">@media (max-width: {{ bp.minWidth }}px)</span>
+          <span class="text-[10px] text-[#6B7280]">@media (max-width: {{ bp.maxWidth }}px)</span>
         </div>
         <button
           class="p-1 rounded hover:bg-[#2A2D3A] text-[#6B7280] hover:text-[#FF6B6B] transition-colors"

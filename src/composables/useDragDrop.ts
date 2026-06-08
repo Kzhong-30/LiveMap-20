@@ -77,7 +77,14 @@ export function useDragDrop(canvasRef: Ref<HTMLElement | null>) {
     e.preventDefault()
     isDragging.value = false
     const highlight = getCellHighlight(e)
-    if (highlight) {
+    if (!highlight) {
+      dragOverCell.value = null
+      return
+    }
+
+    const data = e.dataTransfer?.getData('text/plain') ?? ''
+
+    if (data === 'new-grid-item') {
       gridStore.addItem({
         columnStart: highlight.col,
         columnEnd: highlight.col + 1,
@@ -85,33 +92,25 @@ export function useDragDrop(canvasRef: Ref<HTMLElement | null>) {
         rowEnd: highlight.row + 1,
         label: `Item ${highlight.col},${highlight.row}`,
       })
-    }
-    dragOverCell.value = null
-  }
-
-  function onItemDragStart(e: DragEvent, itemId: string) {
-    if (e.dataTransfer) {
-      e.dataTransfer.setData('text/plain', itemId)
-      e.dataTransfer.effectAllowed = 'move'
-    }
-  }
-
-  function onItemDrop(e: DragEvent, targetItemId: string) {
-    e.preventDefault()
-    e.stopPropagation()
-    const sourceId = e.dataTransfer?.getData('text/plain')
-    if (sourceId && sourceId !== targetItemId && sourceId !== 'new-grid-item') {
-      const sourceItem = gridStore.items.find(i => i.id === sourceId)
-      const targetItem = gridStore.items.find(i => i.id === targetItemId)
-      if (sourceItem && targetItem) {
-        gridStore.updateItem(sourceId, {
-          columnStart: targetItem.columnStart,
-          columnEnd: targetItem.columnEnd,
-          rowStart: targetItem.rowStart,
-          rowEnd: targetItem.rowEnd,
+    } else {
+      const existingItem = gridStore.items.find(i => i.id === data)
+      if (existingItem) {
+        const spanCols = existingItem.columnEnd - existingItem.columnStart
+        const spanRows = existingItem.rowEnd - existingItem.rowStart
+        const maxCol = gridStore.gridConfig.columns
+        const maxRow = gridStore.gridConfig.rows
+        const newColStart = Math.min(highlight.col, maxCol - spanCols + 1)
+        const newRowStart = Math.min(highlight.row, maxRow - spanRows + 1)
+        gridStore.updateItem(data, {
+          columnStart: newColStart,
+          columnEnd: newColStart + spanCols,
+          rowStart: newRowStart,
+          rowEnd: newRowStart + spanRows,
         })
       }
     }
+
+    dragOverCell.value = null
   }
 
   return {
@@ -120,7 +119,5 @@ export function useDragDrop(canvasRef: Ref<HTMLElement | null>) {
     onCanvasDragOver,
     onCanvasDragLeave,
     onCanvasDrop,
-    onItemDragStart,
-    onItemDrop,
   }
 }

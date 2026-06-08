@@ -92,12 +92,12 @@ export const useGridStore = defineStore('grid', () => {
     activeBreakpoint.value = null
   }
 
-  function addBreakpoint(name: string, minWidth: number) {
+  function addBreakpoint(name: string, maxWidth: number) {
     breakpoints.value = [
       ...breakpoints.value,
       {
         name,
-        minWidth,
+        maxWidth,
         gridConfig: { ...gridConfig.value, columnWidths: [...gridConfig.value.columnWidths], rowHeights: [...gridConfig.value.rowHeights] },
         items: items.value.map(i => ({ ...i })),
       },

@@ -24,7 +24,7 @@ export interface GridItem {
 
 export interface BreakpointConfig {
   name: string
-  minWidth: number
+  maxWidth: number
   gridConfig: GridConfig
   items: GridItem[]
 }
@@ -116,7 +116,7 @@ export function generateFullHTML(config: GridConfig, items: GridItem[], breakpoi
   if (breakpoints.length > 0) {
     breakpointCSS = breakpoints.map(bp => {
       const bpCSS = generateGridCSS(bp.gridConfig, bp.items)
-      return `@media (max-width: ${bp.minWidth}px) {\n  ${bpCSS.split('\n').join('\n  ')}\n}`
+      return `@media (max-width: ${bp.maxWidth}px) {\n  ${bpCSS.split('\n').join('\n  ')}\n}`
     }).join('\n\n')
   }
 
