@@ -1,22 +1,21 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useGridStore } from '@/stores/gridStore'
-import type { CellHighlight } from '@/composables/useDragDrop'
+import { useDragDrop } from '@/composables/useDragDrop'
 import GridItemCard from './GridItemCard.vue'
 import { Plus } from 'lucide-vue-next'
 
 const gridStore = useGridStore()
 
-const props = defineProps<{
-  dragOverCell: CellHighlight | null
-  isDragging: boolean
-}>()
+const canvasRef = ref<HTMLElement | null>(null)
 
-const emit = defineEmits<{
-  'canvas-dragover': [e: DragEvent]
-  'canvas-dragleave': []
-  'canvas-drop': [e: DragEvent]
-}>()
+const {
+  dragOverCell,
+  isDragging,
+  onCanvasDragOver,
+  onCanvasDragLeave,
+  onCanvasDrop,
+} = useDragDrop(canvasRef)
 
 const emptyCells = computed(() => {
   const cells: { col: number; row: number }[] = []
@@ -27,18 +26,6 @@ const emptyCells = computed(() => {
   }
   return cells
 })
-
-function onDragOver(e: DragEvent) {
-  emit('canvas-dragover', e)
-}
-
-function onDragLeave() {
-  emit('canvas-dragleave')
-}
-
-function onDrop(e: DragEvent) {
-  emit('canvas-drop', e)
-}
 
 function handleAddItem() {
   gridStore.addItem({
@@ -66,11 +53,12 @@ function handleDelete(id: string) {
       <span class="text-xs text-[#6B7280]">{{ gridStore.items.length }} 个网格项</span>
     </div>
     <div
+      ref="canvasRef"
       class="relative flex-1 min-h-[500px] rounded-xl border border-[#2A2D3A] bg-[#0F1117] overflow-auto p-4 transition-all duration-300"
       :class="{ 'border-[#00D4AA]/50 shadow-[0_0_20px_rgba(0,212,170,0.1)]': isDragging }"
-      @dragover="onDragOver"
-      @dragleave="onDragLeave"
-      @drop="onDrop"
+      @dragover="onCanvasDragOver"
+      @dragleave="onCanvasDragLeave"
+      @drop="onCanvasDrop"
     >
       <div
         class="w-full min-h-[460px]"

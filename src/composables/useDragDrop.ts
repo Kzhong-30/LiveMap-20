@@ -1,4 +1,4 @@
-import { ref, type Ref, computed } from 'vue'
+import { ref, type Ref } from 'vue'
 import { useGridStore } from '@/stores/gridStore'
 
 export interface CellHighlight {

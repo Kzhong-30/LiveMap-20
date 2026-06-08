@@ -17,7 +17,8 @@ export function useExport() {
     try {
       await navigator.clipboard.writeText(text)
       return true
-    } catch {
+    } catch (e) {
+      console.warn('[Export] Failed to copy to clipboard:', e)
       return false
     }
   }

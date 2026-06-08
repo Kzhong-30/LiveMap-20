@@ -87,6 +87,9 @@ export const useGridStore = defineStore('grid', () => {
       id: `item-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     }))
     selectedItemId.value = null
+    _defaultGridConfig.value = null
+    _defaultItems.value = null
+    activeBreakpoint.value = null
   }
 
   function addBreakpoint(name: string, minWidth: number) {

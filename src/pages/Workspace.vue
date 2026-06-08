@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useGridStore } from '@/stores/gridStore'
-import { useDragDrop } from '@/composables/useDragDrop'
 import ToolBar from '@/components/ToolBar.vue'
 import GridCanvas from '@/components/GridCanvas.vue'
 import ItemEditor from '@/components/ItemEditor.vue'
@@ -10,15 +9,6 @@ import BreakpointEditor from '@/components/BreakpointEditor.vue'
 import HistoryPanel from '@/components/HistoryPanel.vue'
 
 const gridStore = useGridStore()
-const canvasRef = ref<HTMLElement | null>(null)
-
-const {
-  dragOverCell,
-  isDragging,
-  onCanvasDragOver,
-  onCanvasDragLeave,
-  onCanvasDrop,
-} = useDragDrop(canvasRef)
 
 const rightTab = ref<'properties' | 'code' | 'breakpoints' | 'history'>('properties')
 
@@ -35,13 +25,7 @@ const tabs = [
     <ToolBar />
 
     <div class="flex-1 flex flex-col min-w-0 p-4">
-      <GridCanvas
-        :drag-over-cell="dragOverCell"
-        :is-dragging="isDragging"
-        @canvas-dragover="onCanvasDragOver"
-        @canvas-dragleave="onCanvasDragLeave"
-        @canvas-drop="onCanvasDrop"
-      />
+      <GridCanvas />
     </div>
 
     <div class="w-[300px] flex-shrink-0 bg-[#1A1D27] border-l border-[#2A2D3A] flex flex-col h-full">

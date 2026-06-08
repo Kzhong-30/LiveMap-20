@@ -7,11 +7,9 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const { fullHTML, copyToClipboard } = useExport()
+const { fullHTML, cssCode, copyToClipboard } = useExport()
 const copied = ref(false)
 const activeTab = ref<'html' | 'css'>('html')
-
-const { cssCode } = useExport()
 
 async function handleCopy(text: string) {
   const ok = await copyToClipboard(text)
