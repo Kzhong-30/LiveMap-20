@@ -61,6 +61,7 @@ function handleDelete(id: string) {
       @drop="onCanvasDrop"
     >
       <div
+        data-grid-container
         class="w-full min-h-[460px]"
         :style="{
           display: 'grid',

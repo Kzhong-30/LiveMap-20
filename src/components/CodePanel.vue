@@ -32,7 +32,8 @@ const syntaxHighlighted = computed(() => {
   code = code
     .replace(/(display|grid-template-columns|grid-template-rows|column-gap|row-gap|grid-column|grid-row|justify-self|align-self):/g, '<span class="text-[#FF6B6B]">$1</span>:')
     .replace(/(grid);/g, '<span class="text-[#00D4AA]">$1</span>;')
-    .replace(/(\d+fr|\d+px|auto|start|center|end|stretch)/g, '<span class="text-[#FFEAA7]">$1</span>')
+    .replace(/(\d+fr|\d+px)(?=[;\s])/g, '<span class="text-[#FFEAA7]">$1</span>')
+    .replace(/:\s*(auto|start|center|end|stretch)(?=[;\s])/g, ': <span class="text-[#FFEAA7]">$1</span>')
     .replace(/(\/)/g, '<span class="text-[#9CA3AF]">$1</span>')
     .replace(/(\.grid-container|\.grid-item)/g, '<span class="text-[#DDA0DD]">$1</span>')
     .replace(/(&gt; :nth-child\(\d+\))/g, '<span class="text-[#DDA0DD]">$1</span>')

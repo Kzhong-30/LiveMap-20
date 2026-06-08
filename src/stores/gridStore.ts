@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import type { GridConfig, GridItem, BreakpointConfig } from '@/types'
 import { createDefaultGridConfig, createDefaultItem } from '@/types'
 
@@ -198,6 +198,9 @@ export const useGridStore = defineStore('grid', () => {
     items.value = snapshot.items
     breakpoints.value = snapshot.breakpoints
     selectedItemId.value = null
+    _defaultGridConfig.value = null
+    _defaultItems.value = null
+    activeBreakpoint.value = null
   }
 
   return {

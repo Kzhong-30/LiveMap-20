@@ -17,7 +17,7 @@ export function useDragDrop(canvasRef: Ref<HTMLElement | null>) {
 
   function getGridContainer(): HTMLElement | null {
     if (!canvasRef.value) return null
-    return canvasRef.value.querySelector('[style*="display: grid"]') as HTMLElement | null
+    return canvasRef.value.querySelector('[data-grid-container]') as HTMLElement | null
   }
 
   function getCellHighlight(e: DragEvent): CellHighlight | null {
@@ -89,13 +89,6 @@ export function useDragDrop(canvasRef: Ref<HTMLElement | null>) {
     dragOverCell.value = null
   }
 
-  function onDragSourceStart(e: DragEvent) {
-    if (e.dataTransfer) {
-      e.dataTransfer.setData('text/plain', 'new-grid-item')
-      e.dataTransfer.effectAllowed = 'copy'
-    }
-  }
-
   function onItemDragStart(e: DragEvent, itemId: string) {
     if (e.dataTransfer) {
       e.dataTransfer.setData('text/plain', itemId)
@@ -127,7 +120,6 @@ export function useDragDrop(canvasRef: Ref<HTMLElement | null>) {
     onCanvasDragOver,
     onCanvasDragLeave,
     onCanvasDrop,
-    onDragSourceStart,
     onItemDragStart,
     onItemDrop,
   }
